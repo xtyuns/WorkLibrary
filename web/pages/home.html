@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图书管理</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="../static/lib/layui/css/layui.css">
+</head>
+<body>
+<div class="layui-container layui-row">
+    <div id="app">
+        <h1 style="text-align: center; margin-top: 25px;">书籍列表</h1>
+        <table id="books" lay-filter="books"></table>
+    </div>
+</div>
+
+<script type="text/html" id="edit-book">
+    <div style="padding: 10px">
+        <form id="edit-form" class="layui-form layui-form-pane" action="">
+            <input type="text" name="type" value="{{ d.type }}" hidden>
+            {{# if(d.id){ }}
+            <div class="layui-form-item">
+                <label class="layui-form-label">编号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="id" lay-verify="required" autocomplete="off" class="layui-input"
+                   style="background-color: #eee;" readonly
+                   value="{{ d.id ?? '' }}"
+                    >
+                </div>
+            </div>
+            {{# } }}
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">书名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="bName" lay-verify="required" autocomplete="off" class="layui-input"
+                        value="{{ d.bName ?? '' }}"
+                        >
+                    </div>
+                    <label class="layui-form-label">作者</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="author" lay-verify="required" autocomplete="off" class="layui-input"
+                        value="{{ d.author ?? '' }}"
+                        >
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">出版社</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="pubComp" lay-verify="required" autocomplete="off" class="layui-input"
+                        value="{{ d.pubComp ?? '' }}"
+                        >
+                    </div>
+                    <label class="layui-form-label">出版日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="pubDate" id="datetime" lay-verify="datetime" autocomplete="off" class="layui-input"
+                        value="{{ d.pubDate ?? '' }}"
+                        >
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">库存</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="bCount" lay-verify="int" autocomplete="off" class="layui-input"
+                        value="{{ d.bCount ?? '' }}"
+                        >
+                    </div>
+                    <label class="layui-form-label">价格</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="price" lay-verify="number" autocomplete="off" class="layui-input"
+                        value="{{ d.price ?? '' }}"
+                        >
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left: 0; text-align: center">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>
+<script type="text/html" id="tool-bar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="addBook">
+            <i class="layui-icon layui-icon-add-1"></i> 添加数据
+        </button>
+        <button class="layui-btn layui-btn-sm" lay-event="cutBookList">删除选中行数据</button>
+    </div>
+</script>
+<script type="text/html" id="row-bar">
+    <a class="layui-btn layui-btn-xs" lay-event="editBook">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cutBook">删除</a>
+</script>
+<script src="../static/lib/layui/layui.js"></script>
+<script src="../static/config.js"></script>
+<script src="../static/js/ajax.js"></script>
+
+<!--// global setting-->
+<script>
+    layui.use(function () {
+        const form = layui.form;
+        form.verify({
+            int: [
+                /(^[1-9]\d*$)|0/,
+                '输入内容必须为整数'
+            ],
+            datetime: [
+                /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/,
+                '时间格式不正确'
+            ]
+        })
+    })
+</script>
+
+<!--// render books table-->
+<script>
+    layui.use(['table'], function () {
+        const table = layui.table
+
+        table.render({
+            elem: '#books',
+            title: 'BookList',
+            url: API_URL + '/book?type=getBooks',
+            parseData(res){
+                return {
+                    code: res.code,
+                    msg: res.msg,
+                    data: res.data?.data ?? [],
+                    count: res.data?.count ?? 0
+                }
+            },
+            response: {
+                statusCode: 200
+            },
+            done(res) {
+                if (res.code === 4001) {
+                    layer.msg('请先登录!', { icon: 5, time: 1500 }, function() {
+                        window.location.href = '../login.html'
+                    })
+                }
+            },
+            cols: [[
+                {type:'checkbox', fixed: 'left'},
+                {field: 'id', title: '编号', sort: true},
+                {field: 'bName', title: '书名'},
+                {field: 'author', title: '作者'},
+                {field: 'pubComp', title: '出版社'},
+                {field: 'pubDate', title: '出版日期', sort: true},
+                {field: 'bCount', title: '库存', sort: true},
+                {field: 'price', title: '价格', sort: true},
+                {title:'操作', toolbar: '#row-bar', fixed: 'right', minWidth: 120}
+            ]],
+            toolbar: '#tool-bar',
+            defaultToolbar: ['filter', 'print', 'exports', {
+                title: '退出登录'
+                ,layEvent: 'tb_logout'
+                ,icon: 'layui-icon-logout'
+            }],
+            page: true
+        })
+    })
+</script>
+
+<!--// action on rows: curBook-->
+<script>
+    layui.use(function () {
+        const table = layui.table;
+        const layTpl = layui.laytpl;
+        const layDate = layui.laydate;
+
+        table.on('tool(books)', function(obj) {
+            const data = obj.data;
+            // console.log(obj)
+            if (obj.event === 'cutBook') {
+                layer.confirm('确定要删除 ' + data.id + ' -《' + data.bName + '》么?', function (index) {
+                    layer.close(index);
+                    getData(API_URL + "/book?type=cutBook&id=" + data.id, function () {
+                        table.reload('books');
+                    })
+                });
+            } else if (obj.event === 'editBook') {
+                // console.log(data)
+                let html = ''
+                layTpl($('#edit-book').html()).render({...data, type: 'editBook'}, function (h) {
+                    html = h
+                })
+
+                let lyIndex = layer.open({
+                    type: 1,
+                    title: '编辑书籍',
+                    offset: '20px',
+                    content: html
+                });
+
+                layDate.render({
+                    elem: '#datetime',
+                    type: 'datetime'
+                })
+
+                $('#edit-form').submit(function () {
+                    postData(API_URL + '/book', $(this).serialize(), function () {
+                        layer.close(lyIndex)
+                        table.reload('books');
+                    })
+                    return false
+                })
+            }
+        })
+    })
+</script>
+
+<!--// action on toolBar-->
+<script>
+    layui.use(function () {
+        const table = layui.table;
+        const layTpl = layui.laytpl;
+        const layDate = layui.laydate;
+        const layer = layui.layer;
+
+        table.on('toolbar(books)', function(tb){
+            // console.log(tb)
+            const checkStatus = table.checkStatus(tb.config.id);
+            switch(tb.event){
+                case 'tb_logout':
+                    layer.confirm('确定要退出登录吗?', { title: '提示' , btn: ['确定', '取消'] }, function () {
+                        getData(API_URL + '/login?logout', function (res) {
+                            layer.msg(res.data, { icon: 1, time: 1500 }, function() {
+                                window.location.href = '../login.html'
+                            })
+                        })
+                    })
+                    break;
+                case 'cutBookList':
+                    layer.confirm('确定要删除选中的 ' + checkStatus.data.length + ' 条数据吗?', function (lyIndex) {
+                        layer.close(lyIndex)
+                        const ids = checkStatus.data.map(item => item.id)
+                        postData(API_URL + '/book', { type: 'cutBookList', ids: ids }, function () {
+                            table.reload('books');
+                        })
+                    })
+                    break;
+                case 'addBook':
+                    let html = '';
+                    layTpl($('#edit-book').html()).render({type: 'addBook'}, function (h) {
+                        html = h;
+                    })
+
+                    let lyIndex = layer.open({
+                        type: 1,
+                        title: '添加书籍',
+                        offset: '20px',
+                        content: html
+                    });
+
+                    layDate.render({
+                        elem: '#datetime',
+                        type: 'datetime'
+                    })
+
+                    $('#edit-form').submit(function () {
+                        postData(API_URL + '/book', $(this).serialize(), function () {
+                            layer.close(lyIndex)
+                            table.reload('books');
+                        })
+                        return false
+                    })
+                    break;
+            }
+        })
+    })
+</script>
+</body>
+</html>

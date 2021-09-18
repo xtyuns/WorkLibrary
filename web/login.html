@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户登录</title>
+    <link rel="stylesheet" type="text/css" href="static/lib/layui/css/layui.css">
+    <style>
+        #app {
+            height: 50vh;
+            position: relative;
+        }
+
+        .login-box {
+            position: absolute;
+            height: 230px;
+            top: calc((100vh - 230px) / 2);
+        }
+
+        @media screen and (max-width: 360px) {
+            .login-box {
+                width: 80%;
+                left: calc((100vw - 80%) / 2);
+            }
+        }
+        @media screen and (min-width: 361px) {
+            .login-box {
+                width: 70%;
+                left: calc((100vw - 70%) / 2);
+            }
+        }
+        @media screen and (min-width: 601px) {
+            .login-box {
+                width: 40%;
+                left: calc((100vw - 40%) / 2);
+            }
+        }
+        @media screen and (min-width: 961px) {
+            .login-box {
+                width: 25%;
+                left: calc((100vw - 25%) / 2);
+            }
+        }
+
+        .login-box>h3 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .login-warp {
+            background-color: #fff;
+            padding: 35px 20px 10px;
+            box-shadow: 0 0 8px #eee;
+            border-radius: 5px;
+        }
+
+        .layui-input-block.btns {
+            margin-left: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="layui-bg-green">
+    <div class="login-box">
+        <h3>用户登录</h3>
+        <div class="login-warp">
+            <form class="layui-form" id="login-form">
+                <div class="layui-form-item">
+                    <input type="text" name="username" lay-verify="required" placeholder="用户名" class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <input type="password" name="password" lay-verify="required" placeholder="密码" class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block btns">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="static/lib/layui/layui.js"></script>
+<script src="static/config.js"></script>
+<script src="static/js/ajax.js"></script>
+<script>
+layui.use(function () {
+    const layer = layui.layer
+
+    $('#login-form').submit(function () {
+        postData(API_URL + '/login', $(this).serialize(), function () {
+            window.location.href = './pages/home.html'
+        })
+        return false
+    })
+})
+</script>
+</body>
+</html>
