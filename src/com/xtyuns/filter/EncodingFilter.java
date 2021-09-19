@@ -13,7 +13,7 @@ public class EncodingFilter implements Filter {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         String uri = ((HttpServletRequest) request).getRequestURI();
-        if (uri.endsWith(".jsp") || uri.endsWith(".html") || uri.equals("/")) {
+        if (uri.endsWith(".jsp") || uri.endsWith(".html") || uri.endsWith("/")) {
             response.setContentType("text/html;charset=utf-8");
         } else if (!uri.contains(".")) {
             response.setContentType("text/json;charset=utf-8");

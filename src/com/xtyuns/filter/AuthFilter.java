@@ -13,9 +13,12 @@ public class AuthFilter implements Filter {
         HttpServletRequest hsr = (HttpServletRequest) request;
         String uri = hsr.getRequestURI();
         uri = uri.replace("../", "");
+        // remove context path in URI
+        String contextPath = hsr.getServletContext().getContextPath();
+        uri = uri.substring(contextPath.length());
 
         // 前端页面分离, 因此只过滤 Servlet, 放行首页和登录页
-        if (uri.substring(1).equals(request.getServletContext().getContextPath()) || uri.contains(".") || "/login".equals(uri)) {
+        if ("/".equals(uri) || "/login".equals(uri) || uri.contains(".")) {
             chain.doFilter(request, response);
         } else {
             HttpSession session = hsr.getSession();
