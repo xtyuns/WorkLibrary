@@ -21,9 +21,8 @@ public class AuthFilter implements Filter {
         if ("/".equals(uri) || "/login".equals(uri) || uri.contains(".")) {
             chain.doFilter(request, response);
         } else {
-            HttpSession session = hsr.getSession();
-            Object user = session.getAttribute("user");
-            if (null != user) {
+            HttpSession session = hsr.getSession(false);
+            if (null != session && null != session.getAttribute("user")) {
                 chain.doFilter(request, response);
             } else {
                 Result result = Result.error(4001, "用户未登录!");
